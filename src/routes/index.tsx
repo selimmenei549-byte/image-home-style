@@ -288,37 +288,34 @@ function Index() {
 
         {stagedUrl && imageUrl && (
           <section className="mt-10">
-            <div className="grid gap-6 md:grid-cols-2">
-              <ImageCard label="BEFORE" src={imageUrl} tone="slate" />
-              <div>
-                <ImageCard label="AFTER" src={stagedUrl} tone="accent" />
-                <ul className="mt-5 space-y-2 text-sm text-slate-700">
-                  <Check>More attractive</Check>
-                  <Check>Better first impression</Check>
-                  <Check>Ready for listing</Check>
-                </ul>
-                <button
-                  type="button"
-                  onClick={download}
-                  className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full border border-accent-500 bg-white px-6 py-3 text-sm font-semibold text-accent-600 transition hover:bg-accent-50 sm:w-auto"
+            <BeforeAfterSlider before={imageUrl} after={stagedUrl} />
+            <div className="mt-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <ul className="space-y-2 text-sm text-slate-700">
+                <Check>More attractive</Check>
+                <Check>Better first impression</Check>
+                <Check>Ready for listing</Check>
+              </ul>
+              <button
+                type="button"
+                onClick={download}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-accent-500 bg-white px-6 py-3 text-sm font-semibold text-accent-600 transition hover:bg-accent-50"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4"
-                  >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Download
-                </button>
-              </div>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Download
+              </button>
             </div>
           </section>
         )}
