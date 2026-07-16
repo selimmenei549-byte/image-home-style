@@ -64,7 +64,7 @@ async function stageWithLovable(imageUrl: string, prompt: string) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-pro-image",
+        model: "google/gemini-3.1-flash-image",
         messages: [
           {
             role: "user",

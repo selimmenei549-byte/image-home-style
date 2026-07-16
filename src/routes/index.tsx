@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -288,37 +288,34 @@ function Index() {
 
         {stagedUrl && imageUrl && (
           <section className="mt-10">
-            <div className="grid gap-6 md:grid-cols-2">
-              <ImageCard label="BEFORE" src={imageUrl} tone="slate" />
-              <div>
-                <ImageCard label="AFTER" src={stagedUrl} tone="accent" />
-                <ul className="mt-5 space-y-2 text-sm text-slate-700">
-                  <Check>More attractive</Check>
-                  <Check>Better first impression</Check>
-                  <Check>Ready for listing</Check>
-                </ul>
-                <button
-                  type="button"
-                  onClick={download}
-                  className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full border border-accent-500 bg-white px-6 py-3 text-sm font-semibold text-accent-600 transition hover:bg-accent-50 sm:w-auto"
+            <BeforeAfterSlider before={imageUrl} after={stagedUrl} />
+            <div className="mt-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <ul className="space-y-2 text-sm text-slate-700">
+                <Check>More attractive</Check>
+                <Check>Better first impression</Check>
+                <Check>Ready for listing</Check>
+              </ul>
+              <button
+                type="button"
+                onClick={download}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-accent-500 bg-white px-6 py-3 text-sm font-semibold text-accent-600 transition hover:bg-accent-50"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4"
-                  >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Download
-                </button>
-              </div>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Download
+              </button>
             </div>
           </section>
         )}
@@ -400,5 +397,75 @@ function Spinner() {
         d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
       />
     </svg>
+  );
+}
+
+function BeforeAfterSlider({ before, after }: { before: string; after: string }) {
+  const [pos, setPos] = useState(50);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const draggingRef = useRef(false);
+
+  const updateFromClientX = useCallback((clientX: number) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const p = ((clientX - rect.left) / rect.width) * 100;
+    setPos(Math.max(0, Math.min(100, p)));
+  }, []);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent | TouchEvent) => {
+      if (!draggingRef.current) return;
+      const x = "touches" in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
+      updateFromClientX(x);
+    };
+    const onUp = () => { draggingRef.current = false; };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove);
+    window.addEventListener("touchend", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, [updateFromClientX]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="card relative w-full select-none overflow-hidden"
+      style={{ aspectRatio: "16 / 10" }}
+      onMouseDown={(e) => { draggingRef.current = true; updateFromClientX(e.clientX); }}
+      onTouchStart={(e) => { draggingRef.current = true; updateFromClientX(e.touches[0].clientX); }}
+    >
+      <img src={after} alt="After staging" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
+      <div
+        className="absolute inset-0 h-full overflow-hidden"
+        style={{ width: `${pos}%` }}
+      >
+        <img
+          src={before}
+          alt="Before staging"
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ width: `${100 / (pos / 100)}%`, maxWidth: "none" }}
+          draggable={false}
+        />
+      </div>
+      <span className="absolute left-4 top-4 rounded-full bg-slate-800/80 px-3 py-1 text-xs font-bold tracking-wider text-white">BEFORE</span>
+      <span className="absolute right-4 top-4 rounded-full bg-accent-500 px-3 py-1 text-xs font-bold tracking-wider text-white">AFTER</span>
+      <div
+        className="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.15)]"
+        style={{ left: `${pos}%` }}
+      >
+        <div className="absolute left-1/2 top-1/2 grid h-10 w-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white shadow-lg ring-1 ring-slate-200">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-slate-700">
+            <polyline points="15 18 9 12 15 6" />
+            <polyline points="9 18 15 12 9 6" transform="translate(0)" />
+          </svg>
+        </div>
+      </div>
+    </div>
   );
 }
