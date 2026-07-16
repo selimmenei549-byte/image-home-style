@@ -104,7 +104,7 @@ async function stageWithN8n(webhookUrl: string, imageUrl: string, prompt: string
     upstream = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image_url: imageUrl, prompt }),
+      body: JSON.stringify({ image_base64: imageUrl, prompt }),
     });
   } catch (e) {
     console.error("n8n fetch failed", e);
