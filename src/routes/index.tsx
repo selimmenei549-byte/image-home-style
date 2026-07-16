@@ -399,3 +399,73 @@ function Spinner() {
     </svg>
   );
 }
+
+function BeforeAfterSlider({ before, after }: { before: string; after: string }) {
+  const [pos, setPos] = useState(50);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const draggingRef = useRef(false);
+
+  const updateFromClientX = useCallback((clientX: number) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const p = ((clientX - rect.left) / rect.width) * 100;
+    setPos(Math.max(0, Math.min(100, p)));
+  }, []);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent | TouchEvent) => {
+      if (!draggingRef.current) return;
+      const x = "touches" in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
+      updateFromClientX(x);
+    };
+    const onUp = () => { draggingRef.current = false; };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove);
+    window.addEventListener("touchend", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, [updateFromClientX]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="card relative w-full select-none overflow-hidden"
+      style={{ aspectRatio: "16 / 10" }}
+      onMouseDown={(e) => { draggingRef.current = true; updateFromClientX(e.clientX); }}
+      onTouchStart={(e) => { draggingRef.current = true; updateFromClientX(e.touches[0].clientX); }}
+    >
+      <img src={after} alt="After staging" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
+      <div
+        className="absolute inset-0 h-full overflow-hidden"
+        style={{ width: `${pos}%` }}
+      >
+        <img
+          src={before}
+          alt="Before staging"
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ width: `${100 / (pos / 100)}%`, maxWidth: "none" }}
+          draggable={false}
+        />
+      </div>
+      <span className="absolute left-4 top-4 rounded-full bg-slate-800/80 px-3 py-1 text-xs font-bold tracking-wider text-white">BEFORE</span>
+      <span className="absolute right-4 top-4 rounded-full bg-accent-500 px-3 py-1 text-xs font-bold tracking-wider text-white">AFTER</span>
+      <div
+        className="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.15)]"
+        style={{ left: `${pos}%` }}
+      >
+        <div className="absolute left-1/2 top-1/2 grid h-10 w-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white shadow-lg ring-1 ring-slate-200">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-slate-700">
+            <polyline points="15 18 9 12 15 6" />
+            <polyline points="9 18 15 12 9 6" transform="translate(0)" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
