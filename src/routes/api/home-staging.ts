@@ -128,14 +128,21 @@ async function stageWithN8n(webhookUrl: string, imageUrl: string, prompt: string
     return Response.json({ staged_url: `data:${contentType};base64,${b64}` });
   }
   // Fallback: some workflows return JSON with a URL or base64 field.
-  if (contentType.includes("application/json")) {
-    const j = (await upstream.json()) as {
+  const rawText = await upstream.text().catch(() => "");
+  if (contentType.includes("application/json") && rawText.trim()) {
+    let j: {
       staged_url?: string;
       image_url?: string;
       url?: string;
       b64_json?: string;
       image_base64?: string;
     };
+    try {
+      j = JSON.parse(rawText);
+    } catch {
+      console.error("n8n returned invalid JSON", rawText.slice(0, 200));
+      return Response.json({ error: "n8n returned invalid JSON" }, { status: 502 });
+    }
     const url =
       j.staged_url ??
       j.image_url ??
@@ -143,6 +150,7 @@ async function stageWithN8n(webhookUrl: string, imageUrl: string, prompt: string
       (j.b64_json && `data:image/png;base64,${j.b64_json}`) ??
       (j.image_base64 && `data:image/png;base64,${j.image_base64}`);
     if (url) return Response.json({ staged_url: url });
+
   }
   return Response.json({ error: "Unexpected response from n8n" }, { status: 502 });
 }
