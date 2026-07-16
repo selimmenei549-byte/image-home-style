@@ -104,7 +104,7 @@ async function stageWithN8n(webhookUrl: string, imageUrl: string, prompt: string
     upstream = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image_url: imageUrl, prompt }),
+      body: JSON.stringify({ image_base64: imageUrl, prompt }),
     });
   } catch (e) {
     console.error("n8n fetch failed", e);
@@ -136,6 +136,7 @@ async function stageWithN8n(webhookUrl: string, imageUrl: string, prompt: string
       url?: string;
       b64_json?: string;
       image_base64?: string;
+      data?: { url?: string; b64_json?: string }[];
     };
     try {
       j = JSON.parse(rawText);
@@ -143,10 +144,13 @@ async function stageWithN8n(webhookUrl: string, imageUrl: string, prompt: string
       console.error("n8n returned invalid JSON", rawText.slice(0, 200));
       return Response.json({ error: "n8n returned invalid JSON" }, { status: 502 });
     }
+    const first = j.data?.[0];
     const url =
       j.staged_url ??
       j.image_url ??
       j.url ??
+      first?.url ??
+      (first?.b64_json && `data:image/png;base64,${first.b64_json}`) ??
       (j.b64_json && `data:image/png;base64,${j.b64_json}`) ??
       (j.image_base64 && `data:image/png;base64,${j.image_base64}`);
     if (url) return Response.json({ staged_url: url });
