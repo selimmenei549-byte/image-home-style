@@ -53,12 +53,11 @@ function Index() {
     if (file) handleFile(file);
   };
 
+  const DEFAULT_WEBHOOK = "https://salimanovata.app.n8n.cloud/webhook/estimate-repairs";
+
   const generate = async () => {
+    const effectiveWebhook = webhookUrl.trim() || DEFAULT_WEBHOOK;
     if (mode === "n8n") {
-      if (!webhookUrl.trim()) {
-        setError("Please paste your n8n webhook URL.");
-        return;
-      }
       if (!n8nImageUrl.trim()) {
         setError("Please paste a public image URL (n8n cannot fetch local files).");
         return;
@@ -83,9 +82,10 @@ function Index() {
         body: JSON.stringify({
           image_url: sourceUrl,
           mode,
-          ...(mode === "n8n" ? { webhook_url: webhookUrl.trim() } : {}),
+          ...(mode === "n8n" ? { webhook_url: effectiveWebhook } : {}),
         }),
       });
+
       const data = (await res.json().catch(() => ({}))) as {
         staged_url?: string;
         error?: string;
