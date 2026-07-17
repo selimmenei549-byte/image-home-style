@@ -31,6 +31,7 @@ function Index() {
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [mode, setMode] = useState<"lovable" | "n8n">("lovable");
+  const [prompt, setPrompt] = useState("");
   const [webhookUrl, setWebhookUrl] = useState("");
   const [n8nImageUrl, setN8nImageUrl] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
