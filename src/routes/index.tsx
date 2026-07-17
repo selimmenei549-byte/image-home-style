@@ -173,11 +173,11 @@ function Index() {
                     type="url"
                     value={webhookUrl}
                     onChange={(e) => setWebhookUrl(e.target.value)}
-                    placeholder="https://your-n8n.example.com/webhook/home-staging"
+                    placeholder="https://salimanovata.app.n8n.cloud/webhook/estimate-repairs (default)"
                     className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
                   />
                   <p className="mt-1.5 text-xs text-slate-500">
-                    Your workflow receives {"{ image_url, prompt }"} and must respond with the staged image.
+                    Optional — leave empty to use the default workflow. Your workflow receives {"{ image_base64, prompt }"} and must respond with the staged image.
                   </p>
                   <input
                     type="url"
